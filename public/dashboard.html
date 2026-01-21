@@ -385,6 +385,80 @@
         ).toUpperCase();
       }
 
+      // Fetch and display dashboard data
+      async function loadDashboardData() {
+        try {
+          const response = await fetch(`/api/quizzes?teacher=${user.id}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+          });
+          const data = await response.json();
+
+          if (!response.ok) throw new Error(data.error);
+
+          const quizzes = data.quizzes || [];
+
+          // Update stats
+          const totalQuizzes = quizzes.length;
+          const activeQuizzes = quizzes.filter((q) => q.isPublished).length;
+
+          document.querySelector("p.text-3xl.font-bold").textContent =
+            totalQuizzes;
+          document.querySelectorAll("p.text-3xl.font-bold")[1].textContent =
+            activeQuizzes;
+
+          // Update Recent Quizzes list
+          const recentContainer = document.querySelector(
+            ".lg\\:col-span-2 .space-y-3",
+          );
+          if (quizzes.length === 0) {
+            recentContainer.innerHTML = `
+              <div class="text-center py-8 text-zinc-500">
+                <p>No quizzes created yet.</p>
+                <a href="/create-quiz.html" class="text-brand-400 hover:underline text-sm">Create your first quiz</a>
+              </div>
+            `;
+            return;
+          }
+
+          recentContainer.innerHTML = quizzes
+            .slice(0, 5)
+            .map(
+              (quiz) => `
+            <div class="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl transition-all hover:bg-zinc-800">
+              <div class="flex items-center gap-4">
+                <div class="w-10 h-10 bg-brand-500/20 rounded-lg flex items-center justify-center">
+                  <i data-lucide="${quiz.category?.icon || "book-open"}" class="w-5 h-5 text-brand-400"></i>
+                </div>
+                <div>
+                  <p class="font-medium">${quiz.title}</p>
+                  <p class="text-sm text-zinc-500">
+                    ${quiz.questionCount || 0} questions • Created ${new Date(quiz.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="px-2 py-1 ${quiz.isPublished ? "bg-green-500/10 text-green-400" : "bg-zinc-600/50 text-zinc-400"} text-xs rounded-full">
+                  ${quiz.isPublished ? "Active" : "Draft"}
+                </span>
+                <button class="p-2 hover:bg-zinc-700 rounded-lg transition-colors">
+                  <i data-lucide="more-vertical" class="w-4 h-4 text-zinc-400"></i>
+                </button>
+              </div>
+            </div>
+          `,
+            )
+            .join("");
+
+          lucide.createIcons();
+        } catch (error) {
+          console.error("Dashboard load error:", error);
+        }
+      }
+
+      loadDashboardData();
+
       // Logout functionality
       document
         .getElementById("logoutBtn")

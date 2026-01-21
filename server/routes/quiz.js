@@ -1,9 +1,17 @@
 const express = require('express');
 const router = express.Router();
+const quizController = require('../controllers/quizController');
+const { auth } = require('../middleware/auth');
 
-// Placeholder - will be implemented later
-router.get('/', (req, res) => {
-    res.json({ message: 'Quiz routes will be implemented soon' });
-});
+/**
+ * Quiz Routes
+ */
+
+router.get('/', quizController.getQuizzes);
+router.get('/:id', quizController.getQuizById);
+
+// Protected routes
+router.post('/', auth, quizController.createQuiz);
+router.delete('/:id', auth, quizController.deleteQuiz);
 
 module.exports = router;
