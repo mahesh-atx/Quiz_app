@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Quiz Results - QuizCraft" />
+    <title>Results - QuizCraft</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+            colors: {
+              brand: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                200: "#c7d2fe",
+                300: "#a5b4fc",
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+                800: "#3730a3",
+                900: "#312e81",
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-sans bg-zinc-950 text-zinc-100 antialiased min-h-screen">
+    <!-- Sidebar -->
+    <aside
+      class="fixed left-0 top-0 h-full w-64 bg-zinc-900 border-r border-zinc-800 p-4 flex flex-col"
+    >
+      <!-- Logo -->
+      <a href="/" class="flex items-center space-x-2 mb-8">
+        <div
+          class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center"
+        >
+          <i data-lucide="brain" class="w-6 h-6 text-white"></i>
+        </div>
+        <span class="text-xl font-bold"
+          >Quiz<span class="text-brand-400">Craft</span></span
+        >
+      </a>
+
+      <!-- Navigation -->
+      <nav class="flex-1 space-y-1">
+        <a
+          href="/dashboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span>Dashboard</span>
+        </a>
+        <a
+          href="/quizzes.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="file-question" class="w-5 h-5"></i>
+          <span>My Quizzes</span>
+        </a>
+        <a
+          href="/create-quiz.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          <span>Create Quiz</span>
+        </a>
+        <a
+          href="/results.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20"
+        >
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+          <span class="font-medium">Results</span>
+        </a>
+        <a
+          href="/students.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span>Students</span>
+        </a>
+      </nav>
+
+      <!-- User Profile -->
+      <div class="border-t border-zinc-800 pt-4 mt-4">
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-zinc-800 cursor-pointer transition-colors"
+        >
+          <div
+            class="w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center"
+          >
+            <span id="userInitial" class="font-semibold text-white">T</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="userName" class="font-medium truncate">Teacher</p>
+            <p class="text-xs text-zinc-500">Teacher</p>
+          </div>
+          <button
+            id="logoutBtn"
+            class="text-zinc-500 hover:text-red-400 transition-colors"
+          >
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 p-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">Quiz Results</h1>
+        <p class="text-zinc-400">View and analyze student performance</p>
+      </div>
+
+      <!-- Stats Overview -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-brand-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="users" class="w-6 h-6 text-brand-400"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold mb-1">234</p>
+          <p class="text-zinc-500 text-sm">Total Attempts</p>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold mb-1">78%</p>
+          <p class="text-zinc-500 text-sm">Average Score</p>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="trophy" class="w-6 h-6 text-amber-400"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold mb-1">92%</p>
+          <p class="text-zinc-500 text-sm">Highest Score</p>
+        </div>
+
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="percent" class="w-6 h-6 text-purple-400"></i>
+            </div>
+          </div>
+          <p class="text-3xl font-bold mb-1">85%</p>
+          <p class="text-zinc-500 text-sm">Pass Rate</p>
+        </div>
+      </div>
+
+      <!-- Filters -->
+      <div class="flex flex-wrap gap-4 mb-6">
+        <select
+          class="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:border-brand-500 outline-none transition-colors"
+        >
+          <option value="all">All Quizzes</option>
+          <option value="math">Mathematics - Chapter 5</option>
+          <option value="science">Science - Biology Basics</option>
+          <option value="english">English Grammar Test</option>
+        </select>
+        <select
+          class="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:border-brand-500 outline-none transition-colors"
+        >
+          <option value="all">All Time</option>
+          <option value="today">Today</option>
+          <option value="week">This Week</option>
+          <option value="month">This Month</option>
+        </select>
+        <button
+          class="px-4 py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors flex items-center gap-2"
+        >
+          <i data-lucide="download" class="w-4 h-4"></i>
+          Export Results
+        </button>
+      </div>
+
+      <!-- Results Table -->
+      <div
+        class="bg-zinc-900 border border-zinc-800 rounded-2xl overflow-hidden"
+      >
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+              <tr class="border-b border-zinc-800">
+                <th
+                  class="text-left px-6 py-4 text-sm font-medium text-zinc-400"
+                >
+                  Student
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-sm font-medium text-zinc-400"
+                >
+                  Quiz
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-sm font-medium text-zinc-400"
+                >
+                  Score
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-sm font-medium text-zinc-400"
+                >
+                  Status
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-sm font-medium text-zinc-400"
+                >
+                  Time Taken
+                </th>
+                <th
+                  class="text-left px-6 py-4 text-sm font-medium text-zinc-400"
+                >
+                  Date
+                </th>
+                <th
+                  class="text-right px-6 py-4 text-sm font-medium text-zinc-400"
+                >
+                  Actions
+                </th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-zinc-800">
+              <tr class="hover:bg-zinc-800/50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 bg-brand-500 rounded-full flex items-center justify-center"
+                    >
+                      <span class="text-sm font-medium">JD</span>
+                    </div>
+                    <span class="font-medium">John Doe</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-zinc-400">Mathematics - Chapter 5</td>
+                <td class="px-6 py-4">
+                  <span class="text-green-400 font-semibold">92%</span>
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-1 bg-green-500/10 text-green-400 text-xs font-medium rounded-full"
+                    >Passed</span
+                  >
+                </td>
+                <td class="px-6 py-4 text-zinc-400">18 min</td>
+                <td class="px-6 py-4 text-zinc-400">Jan 21, 2026</td>
+                <td class="px-6 py-4 text-right">
+                  <button
+                    class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                  >
+                    <i data-lucide="eye" class="w-4 h-4 text-zinc-400"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-zinc-800/50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center"
+                    >
+                      <span class="text-sm font-medium">SJ</span>
+                    </div>
+                    <span class="font-medium">Sarah Johnson</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-zinc-400">
+                  Science - Biology Basics
+                </td>
+                <td class="px-6 py-4">
+                  <span class="text-green-400 font-semibold">85%</span>
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-1 bg-green-500/10 text-green-400 text-xs font-medium rounded-full"
+                    >Passed</span
+                  >
+                </td>
+                <td class="px-6 py-4 text-zinc-400">22 min</td>
+                <td class="px-6 py-4 text-zinc-400">Jan 21, 2026</td>
+                <td class="px-6 py-4 text-right">
+                  <button
+                    class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                  >
+                    <i data-lucide="eye" class="w-4 h-4 text-zinc-400"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-zinc-800/50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center"
+                    >
+                      <span class="text-sm font-medium">MK</span>
+                    </div>
+                    <span class="font-medium">Mike Kim</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-zinc-400">Mathematics - Chapter 5</td>
+                <td class="px-6 py-4">
+                  <span class="text-red-400 font-semibold">45%</span>
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-1 bg-red-500/10 text-red-400 text-xs font-medium rounded-full"
+                    >Failed</span
+                  >
+                </td>
+                <td class="px-6 py-4 text-zinc-400">30 min</td>
+                <td class="px-6 py-4 text-zinc-400">Jan 20, 2026</td>
+                <td class="px-6 py-4 text-right">
+                  <button
+                    class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                  >
+                    <i data-lucide="eye" class="w-4 h-4 text-zinc-400"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-zinc-800/50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center"
+                    >
+                      <span class="text-sm font-medium">EW</span>
+                    </div>
+                    <span class="font-medium">Emily Wilson</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-zinc-400">English Grammar Test</td>
+                <td class="px-6 py-4">
+                  <span class="text-green-400 font-semibold">78%</span>
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-1 bg-green-500/10 text-green-400 text-xs font-medium rounded-full"
+                    >Passed</span
+                  >
+                </td>
+                <td class="px-6 py-4 text-zinc-400">35 min</td>
+                <td class="px-6 py-4 text-zinc-400">Jan 20, 2026</td>
+                <td class="px-6 py-4 text-right">
+                  <button
+                    class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                  >
+                    <i data-lucide="eye" class="w-4 h-4 text-zinc-400"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr class="hover:bg-zinc-800/50 transition-colors">
+                <td class="px-6 py-4">
+                  <div class="flex items-center gap-3">
+                    <div
+                      class="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center"
+                    >
+                      <span class="text-sm font-medium">AC</span>
+                    </div>
+                    <span class="font-medium">Alex Chen</span>
+                  </div>
+                </td>
+                <td class="px-6 py-4 text-zinc-400">
+                  Science - Biology Basics
+                </td>
+                <td class="px-6 py-4">
+                  <span class="text-green-400 font-semibold">88%</span>
+                </td>
+                <td class="px-6 py-4">
+                  <span
+                    class="px-2 py-1 bg-green-500/10 text-green-400 text-xs font-medium rounded-full"
+                    >Passed</span
+                  >
+                </td>
+                <td class="px-6 py-4 text-zinc-400">20 min</td>
+                <td class="px-6 py-4 text-zinc-400">Jan 19, 2026</td>
+                <td class="px-6 py-4 text-right">
+                  <button
+                    class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                  >
+                    <i data-lucide="eye" class="w-4 h-4 text-zinc-400"></i>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div
+          class="border-t border-zinc-800 px-6 py-4 flex items-center justify-between"
+        >
+          <p class="text-sm text-zinc-500">Showing 1-5 of 234 results</p>
+          <div class="flex items-center gap-2">
+            <button
+              class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors disabled:opacity-50"
+              disabled
+            >
+              <i data-lucide="chevron-left" class="w-4 h-4"></i>
+            </button>
+            <button class="px-3 py-2 bg-brand-500 rounded-lg">1</button>
+            <button
+              class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+            >
+              2
+            </button>
+            <button
+              class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+            >
+              3
+            </button>
+            <span class="text-zinc-500">...</span>
+            <button
+              class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+            >
+              47
+            </button>
+            <button
+              class="px-3 py-2 bg-zinc-800 hover:bg-zinc-700 rounded-lg transition-colors"
+            >
+              <i data-lucide="chevron-right" class="w-4 h-4"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+      lucide.createIcons();
+
+      // Check auth
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!user || !accessToken) {
+        window.location.href = "/login.html";
+      } else {
+        document.getElementById("userName").textContent =
+          user.name || "Teacher";
+        document.getElementById("userInitial").textContent = (
+          user.name?.[0] || "T"
+        ).toUpperCase();
+      }
+
+      // Logout
+      document.getElementById("logoutBtn").addEventListener("click", () => {
+        localStorage.clear();
+        window.location.href = "/login.html";
+      });
+    </script>
+  </body>
+</html>

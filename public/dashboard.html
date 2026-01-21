@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="QuizCraft Teacher Dashboard - Manage your quizzes"
+    />
+    <title>Dashboard - QuizCraft</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+            colors: {
+              brand: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                200: "#c7d2fe",
+                300: "#a5b4fc",
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+                800: "#3730a3",
+                900: "#312e81",
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body class="font-sans bg-zinc-950 text-zinc-100 antialiased min-h-screen">
+    <!-- Sidebar -->
+    <aside
+      class="fixed left-0 top-0 h-full w-64 bg-zinc-900 border-r border-zinc-800 p-4 flex flex-col"
+    >
+      <!-- Logo -->
+      <a href="/" class="flex items-center space-x-2 mb-8">
+        <div
+          class="w-10 h-10 bg-brand-500 rounded-xl flex items-center justify-center"
+        >
+          <i data-lucide="brain" class="w-6 h-6 text-white"></i>
+        </div>
+        <span class="text-xl font-bold"
+          >Quiz<span class="text-brand-400">Craft</span></span
+        >
+      </a>
+
+      <!-- Navigation -->
+      <nav class="flex-1 space-y-1">
+        <a
+          href="/dashboard.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl bg-brand-500/10 text-brand-400 border border-brand-500/20"
+        >
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span class="font-medium">Dashboard</span>
+        </a>
+        <a
+          href="/quizzes.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="file-question" class="w-5 h-5"></i>
+          <span>My Quizzes</span>
+        </a>
+        <a
+          href="/create-quiz.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          <span>Create Quiz</span>
+        </a>
+        <a
+          href="/results.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+          <span>Results</span>
+        </a>
+        <a
+          href="/students.html"
+          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
+        >
+          <i data-lucide="users" class="w-5 h-5"></i>
+          <span>Students</span>
+        </a>
+      </nav>
+
+      <!-- User Profile -->
+      <div class="border-t border-zinc-800 pt-4 mt-4">
+        <div
+          class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-zinc-800 cursor-pointer transition-colors"
+        >
+          <div
+            class="w-10 h-10 bg-brand-500 rounded-full flex items-center justify-center"
+          >
+            <span id="userInitial" class="font-semibold text-white">T</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="userName" class="font-medium truncate">Test Teacher</p>
+            <p class="text-xs text-zinc-500">Teacher</p>
+          </div>
+          <button
+            id="logoutBtn"
+            class="text-zinc-500 hover:text-red-400 transition-colors"
+          >
+            <i data-lucide="log-out" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-64 p-8">
+      <!-- Header -->
+      <div class="mb-8">
+        <h1 class="text-3xl font-bold mb-2">
+          Welcome back, <span id="welcomeName">Teacher</span>!
+        </h1>
+        <p class="text-zinc-400">
+          Here's what's happening with your quizzes today.
+        </p>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <!-- Total Quizzes -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-brand-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="file-question" class="w-6 h-6 text-brand-400"></i>
+            </div>
+            <span
+              class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
+              >+12%</span
+            >
+          </div>
+          <p class="text-3xl font-bold mb-1">24</p>
+          <p class="text-zinc-500 text-sm">Total Quizzes</p>
+        </div>
+
+        <!-- Active Quizzes -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="play-circle" class="w-6 h-6 text-green-400"></i>
+            </div>
+            <span
+              class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
+              >Live</span
+            >
+          </div>
+          <p class="text-3xl font-bold mb-1">8</p>
+          <p class="text-zinc-500 text-sm">Active Quizzes</p>
+        </div>
+
+        <!-- Total Students -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-purple-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="users" class="w-6 h-6 text-purple-400"></i>
+            </div>
+            <span
+              class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
+              >+5%</span
+            >
+          </div>
+          <p class="text-3xl font-bold mb-1">156</p>
+          <p class="text-zinc-500 text-sm">Total Students</p>
+        </div>
+
+        <!-- Avg Score -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="trending-up" class="w-6 h-6 text-amber-400"></i>
+            </div>
+            <span
+              class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
+              >+3%</span
+            >
+          </div>
+          <p class="text-3xl font-bold mb-1">78%</p>
+          <p class="text-zinc-500 text-sm">Average Score</p>
+        </div>
+      </div>
+
+      <!-- Quick Actions & Recent Quizzes -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Quick Actions -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <h2 class="text-lg font-semibold mb-4">Quick Actions</h2>
+          <div class="space-y-3">
+            <a
+              href="/create-quiz.html"
+              class="flex items-center gap-3 p-4 bg-brand-500 hover:bg-brand-600 rounded-xl transition-colors"
+            >
+              <i data-lucide="plus" class="w-5 h-5"></i>
+              <span class="font-medium">Create New Quiz</span>
+            </a>
+            <a
+              href="/quizzes.html"
+              class="flex items-center gap-3 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors"
+            >
+              <i data-lucide="list" class="w-5 h-5"></i>
+              <span>View All Quizzes</span>
+            </a>
+            <a
+              href="/results.html"
+              class="flex items-center gap-3 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors"
+            >
+              <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
+              <span>View Analytics</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Recent Quizzes -->
+        <div
+          class="lg:col-span-2 bg-zinc-900 border border-zinc-800 rounded-2xl p-6"
+        >
+          <div class="flex items-center justify-between mb-4">
+            <h2 class="text-lg font-semibold">Recent Quizzes</h2>
+            <a
+              href="/quizzes.html"
+              class="text-brand-400 hover:text-brand-300 text-sm"
+              >View All</a
+            >
+          </div>
+          <div class="space-y-3">
+            <!-- Quiz Item -->
+            <div
+              class="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 bg-brand-500/20 rounded-lg flex items-center justify-center"
+                >
+                  <i data-lucide="book-open" class="w-5 h-5 text-brand-400"></i>
+                </div>
+                <div>
+                  <p class="font-medium">Mathematics Quiz - Chapter 5</p>
+                  <p class="text-sm text-zinc-500">
+                    15 questions • Created 2 days ago
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full"
+                  >Active</span
+                >
+                <button
+                  class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                >
+                  <i
+                    data-lucide="more-vertical"
+                    class="w-4 h-4 text-zinc-400"
+                  ></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quiz Item -->
+            <div
+              class="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center"
+                >
+                  <i
+                    data-lucide="flask-conical"
+                    class="w-5 h-5 text-purple-400"
+                  ></i>
+                </div>
+                <div>
+                  <p class="font-medium">Science Test - Biology Basics</p>
+                  <p class="text-sm text-zinc-500">
+                    20 questions • Created 5 days ago
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-1 bg-green-500/10 text-green-400 text-xs rounded-full"
+                  >Active</span
+                >
+                <button
+                  class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                >
+                  <i
+                    data-lucide="more-vertical"
+                    class="w-4 h-4 text-zinc-400"
+                  ></i>
+                </button>
+              </div>
+            </div>
+
+            <!-- Quiz Item -->
+            <div
+              class="flex items-center justify-between p-4 bg-zinc-800/50 rounded-xl"
+            >
+              <div class="flex items-center gap-4">
+                <div
+                  class="w-10 h-10 bg-amber-500/20 rounded-lg flex items-center justify-center"
+                >
+                  <i data-lucide="globe" class="w-5 h-5 text-amber-400"></i>
+                </div>
+                <div>
+                  <p class="font-medium">General Knowledge Quiz</p>
+                  <p class="text-sm text-zinc-500">
+                    25 questions • Created 1 week ago
+                  </p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span
+                  class="px-2 py-1 bg-zinc-600/50 text-zinc-400 text-xs rounded-full"
+                  >Draft</span
+                >
+                <button
+                  class="p-2 hover:bg-zinc-700 rounded-lg transition-colors"
+                >
+                  <i
+                    data-lucide="more-vertical"
+                    class="w-4 h-4 text-zinc-400"
+                  ></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Initialize Lucide Icons -->
+    <script>
+      lucide.createIcons();
+
+      // Check if user is logged in
+      const user = JSON.parse(localStorage.getItem("user") || "null");
+      const accessToken = localStorage.getItem("accessToken");
+
+      if (!user || !accessToken) {
+        window.location.href = "/login.html";
+      } else {
+        // Update UI with user data
+        document.getElementById("userName").textContent =
+          user.name || "Teacher";
+        document.getElementById("welcomeName").textContent =
+          user.name?.split(" ")[0] || "Teacher";
+        document.getElementById("userInitial").textContent = (
+          user.name?.[0] || "T"
+        ).toUpperCase();
+      }
+
+      // Logout functionality
+      document
+        .getElementById("logoutBtn")
+        .addEventListener("click", async () => {
+          try {
+            const refreshToken = localStorage.getItem("refreshToken");
+            await fetch("/api/auth/logout", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ refreshToken }),
+            });
+          } catch (e) {
+            console.error("Logout error:", e);
+          }
+
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          localStorage.removeItem("user");
+          window.location.href = "/login.html";
+        });
+    </script>
+  </body>
+</html>
