@@ -5,6 +5,11 @@ const mongoose = require("mongoose");
  * Uses connection string from environment variables
  */
 const connectDB = async () => {
+  if (!process.env.MONGODB_URI) {
+    console.warn('⚠️  WARNING: MONGODB_URI is not defined. Running in DEMO MODE without database.');
+    return;
+  }
+
   try {
     const conn = await mongoose.connect(process.env.MONGODB_URI);
 
@@ -27,7 +32,7 @@ const connectDB = async () => {
     });
   } catch (error) {
     console.error(`Error connecting to MongoDB: ${error.message}`);
-    process.exit(1);
+    console.warn('⚠️  Failed to connect to MongoDB. Continuing in DEMO MODE.');
   }
 };
 
