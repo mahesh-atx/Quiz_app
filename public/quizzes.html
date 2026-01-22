@@ -798,6 +798,70 @@
         renderQuizzes(filtered);
       }
 
+      // Share Quiz Function
+      window.shareQuiz = function (code, title, link) {
+        if (!code) return;
+
+        // Remove existing modal if any
+        const existingModal = document.getElementById("shareModal");
+        if (existingModal) existingModal.remove();
+
+        const modal = document.createElement("div");
+        modal.id = "shareModal";
+        modal.className =
+          "fixed inset-0 z-50 flex items-center justify-center px-4";
+        modal.innerHTML = `
+          <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity" onclick="this.parentElement.remove()"></div>
+          <div class="bg-zinc-900 border border-zinc-800 rounded-2xl w-full max-w-md p-6 relative z-10 shadow-2xl transform transition-all scale-100">
+            <button onclick="this.closest('#shareModal').remove()" class="absolute top-4 right-4 text-zinc-500 hover:text-white">
+              <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+            
+            <div class="text-center mb-6">
+              <div class="w-12 h-12 bg-brand-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i data-lucide="share-2" class="w-6 h-6 text-brand-500"></i>
+              </div>
+              <h2 class="text-xl font-bold mb-1">Share Quiz</h2>
+              <p class="text-zinc-400 text-sm line-clamp-1">${title}</p>
+            </div>
+
+            <div class="space-y-4 mb-6">
+              <div class="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700">
+                <label class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Access Code</label>
+                <div class="flex items-center gap-2">
+                  <code class="flex-1 text-2xl font-mono font-bold text-center tracking-widest text-brand-400">${code}</code>
+                  <button onclick="navigator.clipboard.writeText('${code}'); this.innerHTML='<i data-lucide=\\'check\\' class=\\'w-5 h-5 text-green-500\\'></i>'; setTimeout(() => this.innerHTML='<i data-lucide=\\'copy\\' class=\\'w-5 h-5\\'></i>', 2000); lucide.createIcons();" class="p-2 hover:bg-zinc-700 rounded-lg text-zinc-400 hover:text-white transition-colors" title="Copy Code">
+                    <i data-lucide="copy" class="w-5 h-5"></i>
+                  </button>
+                </div>
+              </div>
+
+              ${
+                link
+                  ? `
+              <div class="bg-zinc-800/50 rounded-xl p-4 border border-zinc-700">
+                <label class="block text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Join Link</label>
+                <div class="flex items-center gap-2">
+                  <input type="text" value="${link}" readonly class="flex-1 bg-transparent text-sm text-zinc-300 outline-none w-full" />
+                  <button onclick="navigator.clipboard.writeText('${link}'); this.innerHTML='<i data-lucide=\\'check\\' class=\\'w-5 h-5 text-green-500\\'></i>'; setTimeout(() => this.innerHTML='<i data-lucide=\\'link\\' class=\\'w-5 h-5\\'></i>', 2000); lucide.createIcons();" class="p-2 hover:bg-zinc-700 rounded-lg text-zinc-400 hover:text-white transition-colors" title="Copy Link">
+                    <i data-lucide="link" class="w-5 h-5"></i>
+                  </button>
+                </div>
+              </div>
+              `
+                  : ""
+              }
+            </div>
+
+            <div class="text-center">
+               <p class="text-xs text-zinc-500">Students can join at <a href="/join-quiz.html" class="text-brand-400 hover:underline">quizcraft.com/join</a></p>
+            </div>
+          </div>
+        `;
+        document.body.appendChild(modal);
+        lucide.createIcons();
+      };
+
       searchInput.addEventListener("input", applyFilters);
       statusFilter.addEventListener("change", applyFilters);
       categoryFilter.addEventListener("change", applyFilters);

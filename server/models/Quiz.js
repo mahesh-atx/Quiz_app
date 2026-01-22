@@ -106,6 +106,18 @@ const quizSchema = new mongoose.Schema({
         type: String,
         trim: true,
         default: null
+    },
+    
+    // Students who have joined this quiz
+    students: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Student'
+    }],
+    
+    // Shareable join link
+    joinLink: {
+        type: String,
+        default: ''
     }
     
 }, {

@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quiz Result - QuizCraft</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts - Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="/css/styles.css" />
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "system-ui", "sans-serif"],
+            },
+            colors: {
+              brand: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                200: "#c7d2fe",
+                300: "#a5b4fc",
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+                800: "#3730a3",
+                900: "#312e81",
+              },
+            },
+          },
+        },
+      };
+    </script>
+  </head>
+  <body
+    class="font-sans bg-zinc-950 text-zinc-100 antialiased min-h-screen flex items-center justify-center p-4"
+  >
+    <div
+      class="w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-2xl p-8 relative overflow-hidden"
+    >
+      <!-- Background Decoration -->
+      <div
+        class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-500 via-purple-500 to-pink-500"
+      ></div>
+
+      <div id="loading" class="text-center py-12">
+        <i
+          data-lucide="loader"
+          class="w-10 h-10 text-brand-500 animate-spin mx-auto mb-4"
+        ></i>
+        <p class="text-zinc-500">Calculating your score...</p>
+      </div>
+
+      <div id="resultContent" class="hidden text-center">
+        <!-- Score Badge -->
+        <div
+          id="scoreBadge"
+          class="w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6 bg-zinc-800 border-4 border-zinc-700 shadow-xl"
+        >
+          <div>
+            <span id="scorePercentage" class="block text-2xl font-bold"
+              >0%</span
+            >
+          </div>
+        </div>
+
+        <h1 class="text-3xl font-bold mb-2">Quiz Completed!</h1>
+        <p id="resultMessage" class="text-zinc-400 mb-8">
+          Great job on finishing the quiz.
+        </p>
+
+        <!-- Stats Grid -->
+        <div class="grid grid-cols-2 gap-4 mb-8">
+          <div class="bg-zinc-800/50 p-4 rounded-xl border border-zinc-800">
+            <p class="text-zinc-500 text-xs uppercase tracking-wider mb-1">
+              Score
+            </p>
+            <p id="scoreText" class="text-xl font-bold">0/0</p>
+          </div>
+          <div class="bg-zinc-800/50 p-4 rounded-xl border border-zinc-800">
+            <p class="text-zinc-500 text-xs uppercase tracking-wider mb-1">
+              Time
+            </p>
+            <p id="timeText" class="text-xl font-bold">0m 0s</p>
+          </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="space-y-3">
+          <a
+            href="/join-quiz.html"
+            class="block w-full py-3 bg-brand-500 hover:bg-brand-600 rounded-xl font-semibold transition-colors"
+          >
+            Take Another Quiz
+          </a>
+          <a
+            href="/"
+            class="block w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-medium transition-colors"
+          >
+            Back to Home
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      lucide.createIcons();
+
+      document.addEventListener("DOMContentLoaded", async () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const resultId = urlParams.get("id");
+
+        if (!resultId) {
+          window.location.href = "/";
+          return;
+        }
+
+        try {
+          // Fetch result details
+          const response = await fetch(`/api/results/${resultId}`);
+          const data = await response.json();
+
+          if (!response.ok) throw new Error(data.error);
+
+          const result = data.result;
+
+          // Update UI
+          const percentage = Math.round(
+            (result.score / result.totalPoints) * 100,
+          );
+          document.getElementById("scorePercentage").textContent =
+            `${percentage}%`;
+          document.getElementById("scoreText").textContent =
+            `${result.score}/${result.totalPoints}`;
+          document.getElementById("timeText").textContent = formatTime(
+            result.timeTaken,
+          ); // assuming stored in seconds
+
+          // Style based on pass/fail logic (assuming 60% pass for now or use quiz pass percentage if available)
+          // Note: result object usually contains 'passed' boolean if we implemented that in backend
+          const passed = percentage >= 50; // default to 50% if not specified
+
+          const badge = document.getElementById("scoreBadge");
+          if (passed) {
+            badge.classList.add(
+              "border-green-500",
+              "text-green-500",
+              "bg-green-500/10",
+            );
+            badge.classList.remove("border-zinc-700", "bg-zinc-800");
+            document.getElementById("resultMessage").textContent =
+              "Congratulations! You passed the quiz.";
+            document
+              .getElementById("resultMessage")
+              .classList.add("text-green-400");
+          } else {
+            badge.classList.add(
+              "border-red-500",
+              "text-red-500",
+              "bg-red-500/10",
+            );
+            badge.classList.remove("border-zinc-700", "bg-zinc-800");
+            document.getElementById("resultMessage").textContent =
+              "Keep practicing! You can do better.";
+            document
+              .getElementById("resultMessage")
+              .classList.add("text-red-400");
+          }
+
+          document.getElementById("loading").classList.add("hidden");
+          document.getElementById("resultContent").classList.remove("hidden");
+        } catch (error) {
+          console.error("Error loading result:", error);
+          document.getElementById("loading").innerHTML =
+            `<p class="text-red-500">Failed to load results.</p>`;
+        }
+      });
+
+      function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}m ${s}s`;
+      }
+    </script>
+  </body>
+</html>

@@ -506,26 +506,15 @@
     <!-- Auth Utilities -->
     <script src="/js/auth.js"></script>
 
+    <!-- Students Dashboard Script -->
+    <script src="/js/students.js"></script>
+
     <!-- Initialize Lucide Icons -->
     <script>
       lucide.createIcons();
 
       // Initialize authentication
       initAuth();
-
-      // Search functionality
-      document.getElementById("searchInput").addEventListener("input", (e) => {
-        const query = e.target.value.toLowerCase();
-        document.querySelectorAll(".grid > div").forEach((card) => {
-          const name =
-            card.querySelector("h3")?.textContent.toLowerCase() || "";
-          const email =
-            card.querySelector(".text-zinc-500")?.textContent.toLowerCase() ||
-            "";
-          card.style.display =
-            name.includes(query) || email.includes(query) ? "" : "none";
-        });
-      });
     </script>
   </body>
 </html>

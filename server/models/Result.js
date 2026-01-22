@@ -5,11 +5,25 @@ const mongoose = require('mongoose');
  * Stores quiz attempt results and answers
  */
 const resultSchema = new mongoose.Schema({
-    // User who took the quiz
+    // User who took the quiz (for authenticated users)
     user: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User',
-        required: [true, 'User reference is required']
+        required: false
+    },
+    
+    // Student who took the quiz (for guest students)
+    student: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Student',
+        required: false
+    },
+    
+    // Participant type
+    participantType: {
+        type: String,
+        enum: ['user', 'student'],
+        required: true
     },
     
     // Quiz that was taken

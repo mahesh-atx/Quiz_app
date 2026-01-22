@@ -8,11 +8,14 @@ const Category = require('./Category');
 const Quiz = require('./Quiz');
 const Question = require('./Question');
 const Result = require('./Result');
+const Student = require('./Student');
 
 module.exports = {
     User,
     Category,
     Quiz,
     Question,
-    Result
+    Result,
+    Student
 };
+

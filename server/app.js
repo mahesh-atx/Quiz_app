@@ -108,6 +108,9 @@ const configureSession = () => {
     // Result routes
     app.use('/api/results', require('./routes/result'));
 
+    // Student routes
+    app.use('/api/students', require('./routes/student'));
+
     // =============================================================================
     // SERVE FRONTEND
     // =============================================================================

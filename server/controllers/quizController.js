@@ -57,6 +57,13 @@ const createQuiz = async (req, res) => {
             createdBy: req.userId
         });
 
+        // Generate access code if quiz is published
+        if (isPublished) {
+            const code = quiz.generateAccessCode();
+            const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+            quiz.joinLink = `${baseUrl}/join-quiz.html?code=${code}`;
+        }
+
         await quiz.save();
 
         // 3. Create Questions
@@ -189,9 +196,85 @@ const deleteQuiz = async (req, res) => {
     }
 };
 
+/**
+ * Generate or regenerate access code for a quiz
+ * POST /api/quizzes/:id/generate-code
+ */
+const generateCode = async (req, res) => {
+    try {
+        const quiz = await Quiz.findById(req.params.id);
+
+        if (!quiz) {
+            return res.status(404).json({ error: 'Quiz not found' });
+        }
+
+        // Check ownership
+        if (quiz.createdBy.toString() !== req.userId && req.userRole !== 'admin') {
+            return res.status(403).json({ error: 'Unauthorized' });
+        }
+
+        // Generate new code
+        const code = quiz.generateAccessCode();
+        const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
+        quiz.joinLink = `${baseUrl}/join-quiz.html?code=${code}`;
+        
+        await quiz.save();
+
+        res.json({
+            message: 'Access code generated successfully',
+            accessCode: quiz.accessCode,
+            joinLink: quiz.joinLink
+        });
+
+    } catch (error) {
+        console.error('Generate code error:', error);
+        res.status(500).json({ error: 'Failed to generate code' });
+    }
+};
+
+/**
+ * Get quiz by access code (public endpoint)
+ * GET /api/quizzes/join/:code
+ */
+const getQuizByCode = async (req, res) => {
+    try {
+        const { code } = req.params;
+
+        const quiz = await Quiz.findOne({ 
+            accessCode: code.toUpperCase(),
+            isPublished: true 
+        })
+        .populate('category', 'name icon color')
+        .populate('createdBy', 'name');
+
+        if (!quiz) {
+            return res.status(404).json({ error: 'Invalid code or quiz not found' });
+        }
+
+        res.json({
+            quiz: {
+                id: quiz._id,
+                title: quiz.title,
+                description: quiz.description,
+                category: quiz.category,
+                difficulty: quiz.difficulty,
+                timeLimit: quiz.timeLimit,
+                questionCount: quiz.questionCount,
+                createdBy: quiz.createdBy
+            }
+        });
+
+    } catch (error) {
+        console.error('Get quiz by code error:', error);
+        res.status(500).json({ error: 'Failed to fetch quiz' });
+    }
+};
+
 module.exports = {
     createQuiz,
     getQuizzes,
     getQuizById,
-    deleteQuiz
+    deleteQuiz,
+    generateCode,
+    getQuizByCode
 };
