@@ -415,28 +415,28 @@
       </div>
     </template>
 
+    <!-- Auth Utilities -->
+    <script src="/js/auth.js"></script>
+
     <!-- Initialize Lucide Icons -->
     <script>
       lucide.createIcons();
 
-      // Check auth
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      const accessToken = localStorage.getItem("accessToken");
+      // Initialize authentication
+      let currentUser = null;
 
-      if (!user || !accessToken) {
-        window.location.href = "/login.html";
-      } else {
-        document.getElementById("userName").textContent =
-          user.name || "Teacher";
-        document.getElementById("userInitial").textContent = (
-          user.name?.[0] || "T"
-        ).toUpperCase();
+      async function initPage() {
+        currentUser = await initAuth();
+        if (!currentUser) return;
+
+        // Load categories after auth
+        await loadCategories();
       }
 
       // Fetch and populate categories
       async function loadCategories() {
         try {
-          const response = await fetch("/api/categories");
+          const response = await authFetch("/api/categories");
           const data = await response.json();
           const categorySelect = document.getElementById("category");
 
@@ -452,7 +452,7 @@
         }
       }
 
-      loadCategories();
+      initPage();
 
       // Question counter
       let questionCount = 0;
@@ -520,25 +520,54 @@
             lucide.createIcons();
 
             const questions = [];
-            document.querySelectorAll(".question-item").forEach((item) => {
+            let validationError = null;
+
+            const questionItems = document.querySelectorAll(".question-item");
+
+            if (questionItems.length === 0) {
+              throw new Error("Please add at least one question");
+            }
+
+            questionItems.forEach((item, qIndex) => {
               const questionText = item.querySelector(".question-text").value;
+
+              if (!questionText.trim()) {
+                validationError = `Question ${qIndex + 1}: Please enter a question`;
+                return;
+              }
+
               const options = [];
-              let correctIndex = 0;
+              let hasEmptyOption = false;
 
               item.querySelectorAll(".option-text").forEach((opt, i) => {
+                if (!opt.value.trim()) {
+                  hasEmptyOption = true;
+                }
                 options.push({ text: opt.value, isCorrect: false });
               });
+
+              if (hasEmptyOption) {
+                validationError = `Question ${qIndex + 1}: Please fill in all 4 options`;
+                return;
+              }
 
               const selectedRadio = item.querySelector(
                 ".correct-option:checked",
               );
-              if (selectedRadio) {
-                correctIndex = parseInt(selectedRadio.value);
-                options[correctIndex].isCorrect = true;
+              if (!selectedRadio) {
+                validationError = `Question ${qIndex + 1}: Please select the correct answer`;
+                return;
               }
+
+              const correctIndex = parseInt(selectedRadio.value);
+              options[correctIndex].isCorrect = true;
 
               questions.push({ questionText, options });
             });
+
+            if (validationError) {
+              throw new Error(validationError);
+            }
 
             const quizData = {
               title: document.getElementById("title").value,
@@ -553,11 +582,10 @@
               isPublished: true,
             };
 
-            const response = await fetch("/api/quizzes", {
+            const response = await authFetch("/api/quizzes", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
-                Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
               },
               body: JSON.stringify(quizData),
             });
@@ -590,12 +618,6 @@
             lucide.createIcons();
           }
         });
-
-      // Logout
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.href = "/login.html";
-      });
     </script>
   </body>
 </html>

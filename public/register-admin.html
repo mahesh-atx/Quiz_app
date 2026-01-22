@@ -456,6 +456,7 @@
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include", // Important: Include cookies in request
             body: JSON.stringify({
               name,
               email,
@@ -474,14 +475,12 @@
           // Show success
           successMessage.classList.remove("hidden");
 
-          // Store tokens
-          localStorage.setItem("accessToken", data.accessToken);
-          localStorage.setItem("refreshToken", data.refreshToken);
+          // Store user info in localStorage for quick access (session is in cookie)
           localStorage.setItem("user", JSON.stringify(data.user));
 
-          // Redirect to onboarding
+          // Redirect to admin dashboard (session is automatically set via cookie)
           setTimeout(() => {
-            window.location.href = "/onboarding-admin.html";
+            window.location.href = "/admin/dashboard.html";
           }, 1500);
         } catch (error) {
           // Show error

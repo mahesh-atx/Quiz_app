@@ -1,9 +1,8 @@
 const User = require('../models/User');
-const { generateTokenPair, verifyRefreshToken } = require('../utils/tokenUtils');
 
 /**
  * Auth Controller
- * Handles user registration, login, token refresh, and logout
+ * Handles user registration, login, logout using SESSION-BASED authentication
  */
 
 // =============================================================================
@@ -49,18 +48,20 @@ const register = async (req, res) => {
             organization: role === 'admin' ? organization : undefined
         });
         
-        // Generate tokens
-        const tokens = generateTokenPair(user);
-        user.refreshToken = tokens.refreshToken;
-        
         // Save user
         await user.save();
         
-        // Return user data and tokens
+        // Create session
+        req.session.userId = user._id;
+        req.session.role = user.role;
+        req.session.email = user.email;
+        
+        console.log('✅ User registered and session created:', user.email);
+        
+        // Return user data
         res.status(201).json({
             message: 'Registration successful',
-            user: user.toPublicProfile(),
-            ...tokens
+            user: user.toPublicProfile()
         });
         
     } catch (error) {
@@ -100,7 +101,7 @@ const login = async (req, res) => {
     try {
         const { email, password, role } = req.body;
         
-        console.log('Login attempt:', { email, role }); // Debug log
+        console.log('Login attempt:', { email, role });
         
         // =============================================================================
         // DUMMY LOGIN CREDENTIALS FOR TESTING
@@ -144,10 +145,12 @@ const login = async (req, res) => {
                 });
             }
             
-            // Generate tokens for dummy user
-            const tokens = generateTokenPair(dummyUser.user);
+            // Create session for dummy user
+            req.session.userId = dummyUser.user._id;
+            req.session.role = dummyUser.user.role;
+            req.session.email = dummyUser.user.email;
             
-            console.log('Dummy login successful:', dummyUser.user.email);
+            console.log('✅ Dummy login successful:', dummyUser.user.email);
             
             return res.json({
                 message: 'Login successful',
@@ -161,8 +164,7 @@ const login = async (req, res) => {
                     avatar: dummyUser.user.avatar,
                     onboardingCompleted: dummyUser.user.onboardingCompleted,
                     createdAt: dummyUser.user.createdAt
-                },
-                ...tokens
+                }
             });
         }
         // =============================================================================
@@ -172,7 +174,7 @@ const login = async (req, res) => {
         // Find user with password field
         const user = await User.findByEmailWithPassword(email.toLowerCase());
         
-        console.log('User found:', user ? { email: user.email, role: user.role } : 'Not found'); // Debug log
+        console.log('User found:', user ? { email: user.email, role: user.role } : 'Not found');
         
         if (!user) {
             return res.status(401).json({
@@ -195,26 +197,26 @@ const login = async (req, res) => {
             });
         }
         
-        // Verify role matches (optional - can be removed if role selection is not required)
+        // Log role mismatch but allow login with actual role
         if (role && user.role !== role) {
-            return res.status(401).json({
-                error: `This account is registered as ${user.role}, not ${role}`
-            });
+            console.log(`Role mismatch: User selected ${role} but is registered as ${user.role}`);
         }
         
-        // Generate new tokens
-        const tokens = generateTokenPair(user);
-        
-        // Update refresh token and last login
-        user.refreshToken = tokens.refreshToken;
+        // Update last login
         user.lastLogin = new Date();
         await user.save();
         
-        // Return user data and tokens
+        // Create session
+        req.session.userId = user._id;
+        req.session.role = user.role;
+        req.session.email = user.email;
+        
+        console.log('✅ Login successful:', user.email);
+        
+        // Return user data
         res.json({
             message: 'Login successful',
-            user: user.toPublicProfile(),
-            ...tokens
+            user: user.toPublicProfile()
         });
         
     } catch (error) {
@@ -225,98 +227,39 @@ const login = async (req, res) => {
     }
 };
 
-
-// =============================================================================
-// REFRESH TOKEN
-// =============================================================================
-
-/**
- * Refresh access token using refresh token
- * POST /api/auth/refresh
- */
-const refreshToken = async (req, res) => {
-    try {
-        const { refreshToken: token } = req.body;
-        
-        if (!token) {
-            return res.status(400).json({
-                error: 'Refresh token is required'
-            });
-        }
-        
-        // Verify refresh token
-        let decoded;
-        try {
-            decoded = verifyRefreshToken(token);
-        } catch (error) {
-            return res.status(401).json({
-                error: 'Invalid or expired refresh token'
-            });
-        }
-        
-        // Find user with matching refresh token
-        const user = await User.findByRefreshToken(token);
-        
-        if (!user) {
-            return res.status(401).json({
-                error: 'Invalid refresh token'
-            });
-        }
-        
-        // Check if account is still active
-        if (!user.isActive) {
-            return res.status(403).json({
-                error: 'Your account has been deactivated'
-            });
-        }
-        
-        // Generate new token pair
-        const tokens = generateTokenPair(user);
-        
-        // Update refresh token
-        user.refreshToken = tokens.refreshToken;
-        await user.save();
-        
-        res.json({
-            message: 'Token refreshed successfully',
-            ...tokens
-        });
-        
-    } catch (error) {
-        console.error('Token refresh error:', error);
-        res.status(500).json({
-            error: 'Token refresh failed'
-        });
-    }
-};
-
 // =============================================================================
 // LOGOUT
 // =============================================================================
 
 /**
- * Logout user (invalidate refresh token)
+ * Logout user (destroy session)
  * POST /api/auth/logout
  */
 const logout = async (req, res) => {
     try {
-        const { refreshToken: token } = req.body;
+        const userEmail = req.session.email;
         
-        if (token) {
-            // Find and clear user's refresh token
-            await User.findOneAndUpdate(
-                { refreshToken: token },
-                { refreshToken: null }
-            );
-        }
-        
-        res.json({
-            message: 'Logged out successfully'
+        // Destroy session
+        req.session.destroy((err) => {
+            if (err) {
+                console.error('Session destroy error:', err);
+                return res.status(500).json({
+                    error: 'Logout failed'
+                });
+            }
+            
+            // Clear cookie
+            res.clearCookie('connect.sid');
+            
+            console.log('✅ User logged out:', userEmail);
+            
+            res.json({
+                message: 'Logged out successfully'
+            });
         });
         
     } catch (error) {
         console.error('Logout error:', error);
-        // Still return success even if there's an error
         res.json({
             message: 'Logged out successfully'
         });
@@ -333,10 +276,47 @@ const logout = async (req, res) => {
  */
 const getCurrentUser = async (req, res) => {
     try {
-        const user = await User.findById(req.userId)
+        // Check if session exists
+        if (!req.session.userId) {
+            return res.status(401).json({
+                error: 'Not authenticated'
+            });
+        }
+        
+        // Handle dummy users
+        if (req.session.userId === 'dummy-teacher-id-123') {
+            return res.json({
+                user: {
+                    id: 'dummy-teacher-id-123',
+                    name: 'Test Teacher',
+                    email: 'teacher@test.com',
+                    role: 'teacher',
+                    institution: 'Test School',
+                    onboardingCompleted: true
+                }
+            });
+        }
+        
+        if (req.session.userId === 'dummy-admin-id-456') {
+            return res.json({
+                user: {
+                    id: 'dummy-admin-id-456',
+                    name: 'Test Admin',
+                    email: 'admin@test.com',
+                    role: 'admin',
+                    organization: 'Test Organization',
+                    onboardingCompleted: true
+                }
+            });
+        }
+        
+        // Get user from database
+        const user = await User.findById(req.session.userId)
             .populate('categories', 'name icon color');
         
         if (!user) {
+            // Session exists but user doesn't - destroy session
+            req.session.destroy();
             return res.status(404).json({
                 error: 'User not found'
             });
@@ -355,6 +335,27 @@ const getCurrentUser = async (req, res) => {
 };
 
 // =============================================================================
+// CHECK AUTH STATUS
+// =============================================================================
+
+/**
+ * Check if user is authenticated
+ * GET /api/auth/check
+ */
+const checkAuth = async (req, res) => {
+    if (req.session.userId) {
+        res.json({
+            authenticated: true,
+            role: req.session.role
+        });
+    } else {
+        res.json({
+            authenticated: false
+        });
+    }
+};
+
+// =============================================================================
 // CHANGE PASSWORD
 // =============================================================================
 
@@ -366,8 +367,14 @@ const changePassword = async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
         
+        if (!req.session.userId) {
+            return res.status(401).json({
+                error: 'Not authenticated'
+            });
+        }
+        
         // Get user with password
-        const user = await User.findById(req.userId).select('+password');
+        const user = await User.findById(req.session.userId).select('+password');
         
         if (!user) {
             return res.status(404).json({
@@ -387,14 +394,8 @@ const changePassword = async (req, res) => {
         user.password = newPassword;
         await user.save();
         
-        // Generate new tokens (invalidate old sessions)
-        const tokens = generateTokenPair(user);
-        user.refreshToken = tokens.refreshToken;
-        await user.save();
-        
         res.json({
-            message: 'Password changed successfully',
-            ...tokens
+            message: 'Password changed successfully'
         });
         
     } catch (error) {
@@ -408,8 +409,8 @@ const changePassword = async (req, res) => {
 module.exports = {
     register,
     login,
-    refreshToken,
     logout,
     getCurrentUser,
+    checkAuth,
     changePassword
 };

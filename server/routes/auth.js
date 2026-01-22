@@ -6,7 +6,7 @@ const { registerValidation, loginValidation } = require('../middleware/validateI
 
 /**
  * Auth Routes
- * Handles authentication endpoints
+ * Session-Based Authentication
  */
 
 // =============================================================================
@@ -23,27 +23,25 @@ router.post('/register', registerValidation, authController.register);
 
 /**
  * @route   POST /api/auth/login
- * @desc    Login user
+ * @desc    Login user and create session
  * @access  Public
  * @body    { email, password, role? }
  */
 router.post('/login', loginValidation, authController.login);
 
 /**
- * @route   POST /api/auth/refresh
- * @desc    Refresh access token
- * @access  Public
- * @body    { refreshToken }
- */
-router.post('/refresh', authController.refreshToken);
-
-/**
  * @route   POST /api/auth/logout
- * @desc    Logout user
+ * @desc    Logout user and destroy session
  * @access  Public
- * @body    { refreshToken? }
  */
 router.post('/logout', authController.logout);
+
+/**
+ * @route   GET /api/auth/check
+ * @desc    Check if user is authenticated
+ * @access  Public
+ */
+router.get('/check', authController.checkAuth);
 
 // =============================================================================
 // PROTECTED ROUTES

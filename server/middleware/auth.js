@@ -1,54 +1,57 @@
-const { verifyAccessToken } = require('../utils/tokenUtils');
 const User = require('../models/User');
 
 /**
  * Authentication Middleware
- * Verifies JWT token and attaches user to request
+ * Uses SESSION-BASED authentication (checks req.session)
+ */
+
+/**
+ * Require authentication
+ * Blocks request if user is not logged in
  */
 const auth = async (req, res, next) => {
     try {
-        // Get token from Authorization header
-        const authHeader = req.headers.authorization;
-        
-        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        // Check if session exists
+        if (!req.session || !req.session.userId) {
             return res.status(401).json({
-                error: 'Access denied. No token provided.'
+                error: 'Access denied. Please log in.'
             });
         }
         
-        const token = authHeader.split(' ')[1];
+        // Handle dummy users (for testing)
+        if (req.session.userId === 'dummy-teacher-id-123' || 
+            req.session.userId === 'dummy-admin-id-456') {
+            req.userId = req.session.userId;
+            req.userRole = req.session.role;
+            return next();
+        }
         
-        // Verify token
-        const decoded = verifyAccessToken(token);
-        
-        // Get user from database
-        const user = await User.findById(decoded.userId).select('-password -refreshToken');
+        // Get user from database to ensure they still exist and are active
+        const user = await User.findById(req.session.userId).select('-password');
         
         if (!user) {
+            // User was deleted - destroy session
+            req.session.destroy();
             return res.status(401).json({
-                error: 'Invalid token. User not found.'
+                error: 'Session invalid. Please log in again.'
+            });
+        }
+        
+        if (!user.isActive) {
+            req.session.destroy();
+            return res.status(403).json({
+                error: 'Your account has been deactivated.'
             });
         }
         
         // Attach user to request
         req.user = user;
         req.userId = user._id;
+        req.userRole = user.role;
         
         next();
         
     } catch (error) {
-        if (error.name === 'TokenExpiredError') {
-            return res.status(401).json({
-                error: 'Token expired. Please refresh your token.'
-            });
-        }
-        
-        if (error.name === 'JsonWebTokenError') {
-            return res.status(401).json({
-                error: 'Invalid token.'
-            });
-        }
-        
         console.error('Auth middleware error:', error);
         return res.status(500).json({
             error: 'Authentication failed.'
@@ -58,20 +61,25 @@ const auth = async (req, res, next) => {
 
 /**
  * Optional Authentication Middleware
- * Attaches user if token present, but doesn't require it
+ * Attaches user if logged in, but doesn't require it
  */
 const optionalAuth = async (req, res, next) => {
     try {
-        const authHeader = req.headers.authorization;
-        
-        if (authHeader && authHeader.startsWith('Bearer ')) {
-            const token = authHeader.split(' ')[1];
-            const decoded = verifyAccessToken(token);
-            const user = await User.findById(decoded.userId).select('-password -refreshToken');
+        if (req.session && req.session.userId) {
+            // Handle dummy users
+            if (req.session.userId === 'dummy-teacher-id-123' || 
+                req.session.userId === 'dummy-admin-id-456') {
+                req.userId = req.session.userId;
+                req.userRole = req.session.role;
+                return next();
+            }
             
-            if (user) {
+            const user = await User.findById(req.session.userId).select('-password');
+            
+            if (user && user.isActive) {
                 req.user = user;
                 req.userId = user._id;
+                req.userRole = user.role;
             }
         }
         
@@ -83,4 +91,26 @@ const optionalAuth = async (req, res, next) => {
     }
 };
 
-module.exports = { auth, optionalAuth };
+/**
+ * Require specific role
+ * Use after auth middleware
+ */
+const requireRole = (...roles) => {
+    return (req, res, next) => {
+        if (!req.userRole) {
+            return res.status(401).json({
+                error: 'Not authenticated'
+            });
+        }
+        
+        if (!roles.includes(req.userRole)) {
+            return res.status(403).json({
+                error: `Access denied. Required role: ${roles.join(' or ')}`
+            });
+        }
+        
+        next();
+    };
+};
+
+module.exports = { auth, optionalAuth, requireRole };

@@ -1,6 +1,7 @@
 const path = require('path');
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
-const app = require('./app');
+
+const { app, configureSession } = require('./app');
 const connectDB = require('./config/db');
 
 // =============================================================================
@@ -16,6 +17,9 @@ const startServer = async () => {
     try {
         // Connect to MongoDB
         await connectDB();
+        
+        // Configure session middleware (after dotenv and MongoDB connection)
+        configureSession();
         
         // Start Express server
         app.listen(PORT, () => {
@@ -33,6 +37,7 @@ const startServer = async () => {
             console.log('');
             console.log(`   ✓ Server running on http://localhost:${PORT}`);
             console.log(`   ✓ Environment: ${process.env.NODE_ENV || 'development'}`);
+            console.log(`   ✓ Authentication: Session-based (MongoDB store)`);
             console.log('');
         });
         

@@ -503,23 +503,15 @@
       </div>
     </main>
 
+    <!-- Auth Utilities -->
+    <script src="/js/auth.js"></script>
+
     <!-- Initialize Lucide Icons -->
     <script>
       lucide.createIcons();
 
-      // Check auth
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      const accessToken = localStorage.getItem("accessToken");
-
-      if (!user || !accessToken) {
-        window.location.href = "/login.html";
-      } else {
-        document.getElementById("userName").textContent =
-          user.name || "Teacher";
-        document.getElementById("userInitial").textContent = (
-          user.name?.[0] || "T"
-        ).toUpperCase();
-      }
+      // Initialize authentication
+      initAuth();
 
       // Search functionality
       document.getElementById("searchInput").addEventListener("input", (e) => {
@@ -533,12 +525,6 @@
           card.style.display =
             name.includes(query) || email.includes(query) ? "" : "none";
         });
-      });
-
-      // Logout
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.href = "/login.html";
       });
     </script>
   </body>

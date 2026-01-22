@@ -394,6 +394,7 @@
             headers: {
               "Content-Type": "application/json",
             },
+            credentials: "include", // Important: Include cookies in request
             body: JSON.stringify({ email, password, role }),
           });
 
@@ -403,23 +404,14 @@
             throw new Error(data.error || "Login failed");
           }
 
-          // Store tokens
-          localStorage.setItem("accessToken", data.accessToken);
-          localStorage.setItem("refreshToken", data.refreshToken);
+          // Store user info in localStorage for quick access (session is in cookie)
           localStorage.setItem("user", JSON.stringify(data.user));
 
-          // Redirect based on role and onboarding status
-          if (!data.user.onboardingCompleted) {
-            window.location.href =
-              data.user.role === "admin"
-                ? "/onboarding-admin.html"
-                : "/onboarding-teacher.html";
-          } else {
-            window.location.href =
-              data.user.role === "admin"
-                ? "/admin/dashboard.html"
-                : "/dashboard.html";
-          }
+          // Redirect based on role
+          window.location.href =
+            data.user.role === "admin"
+              ? "/admin/dashboard.html"
+              : "/dashboard.html";
         } catch (error) {
           // Show error
           errorText.textContent = error.message;

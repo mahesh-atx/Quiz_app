@@ -622,22 +622,21 @@
       </div>
     </main>
 
+    <!-- Auth Utilities -->
+    <script src="/js/auth.js"></script>
+
     <!-- Initialize Lucide Icons -->
     <script>
       lucide.createIcons();
 
-      // Check auth
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      const accessToken = localStorage.getItem("accessToken");
+      // Initialize page
+      let currentUser = null;
 
-      if (!user || !accessToken) {
-        window.location.href = "/login.html";
-      } else {
-        document.getElementById("userName").textContent =
-          user.name || "Teacher";
-        document.getElementById("userInitial").textContent = (
-          user.name?.[0] || "T"
-        ).toUpperCase();
+      async function initPage() {
+        currentUser = await initAuth();
+        if (currentUser) {
+          await loadQuizzes();
+        }
       }
 
       // Fetch and display quizzes
@@ -645,11 +644,9 @@
         const quizzesGrid = document.getElementById("quizzesGrid");
 
         try {
-          const response = await fetch(`/api/quizzes?teacher=${user.id}`, {
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
-          });
+          const response = await authFetch(
+            `/api/quizzes?teacher=${currentUser.id}`,
+          );
           const data = await response.json();
 
           if (!response.ok) throw new Error(data.error);
@@ -762,11 +759,8 @@
           return;
 
         try {
-          const response = await fetch(`/api/quizzes/${id}`, {
+          const response = await authFetch(`/api/quizzes/${id}`, {
             method: "DELETE",
-            headers: {
-              Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-            },
           });
 
           if (!response.ok) {
@@ -779,8 +773,6 @@
           alert(error.message);
         }
       };
-
-      loadQuizzes();
 
       // Search and Filter functionality
       const searchInput = document.getElementById("searchInput");
@@ -810,11 +802,8 @@
       statusFilter.addEventListener("change", applyFilters);
       categoryFilter.addEventListener("change", applyFilters);
 
-      // Logout
-      document.getElementById("logoutBtn").addEventListener("click", () => {
-        localStorage.clear();
-        window.location.href = "/login.html";
-      });
+      // Initialize
+      initPage();
     </script>
   </body>
 </html>
