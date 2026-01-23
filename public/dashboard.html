@@ -423,7 +423,9 @@
       // Fetch and display dashboard data
       async function loadDashboardData(user) {
         try {
-          const response = await fetch(`/api/quizzes?teacher=${user.id}`, {
+          // Use _id from MongoDB if available, otherwise use id
+          const userId = user._id || user.id;
+          const response = await fetch(`/api/quizzes?teacher=${userId}`, {
             credentials: "include", // Important: Include cookies
           });
           const data = await response.json();

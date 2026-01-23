@@ -17,9 +17,19 @@ const register = async (req, res) => {
     try {
         const { name, email, password, role, institution, organization } = req.body;
         
+        console.log('📝 Registration attempt:', { name, email, role, hasInstitution: !!institution });
+        
+        // Validate required fields
+        if (!name || !email || !password) {
+            return res.status(400).json({
+                error: 'Name, email, and password are required'
+            });
+        }
+        
         // Check if user already exists
         const existingUser = await User.findOne({ email: email.toLowerCase() });
         if (existingUser) {
+            console.log('⚠️  User already exists:', email);
             return res.status(400).json({
                 error: 'An account with this email already exists'
             });
@@ -40,23 +50,27 @@ const register = async (req, res) => {
         
         // Create new user
         const user = new User({
-            name,
-            email: email.toLowerCase(),
+            name: name.trim(),
+            email: email.toLowerCase().trim(),
             password,
             role,
-            institution: role === 'teacher' ? institution : undefined,
-            organization: role === 'admin' ? organization : undefined
+            institution: role === 'teacher' ? institution.trim() : undefined,
+            organization: role === 'admin' ? organization.trim() : undefined
         });
+        
+        console.log('💾 Saving user to database...');
         
         // Save user
         await user.save();
+        
+        console.log('✅ User saved successfully:', user._id, user.email);
         
         // Create session
         req.session.userId = user._id;
         req.session.role = user.role;
         req.session.email = user.email;
         
-        console.log('✅ User registered and session created:', user.email);
+        console.log('✅ Session created for user:', user.email);
         
         // Return user data
         res.status(201).json({
@@ -65,26 +79,38 @@ const register = async (req, res) => {
         });
         
     } catch (error) {
-        console.error('Registration error:', error);
+        console.error('❌ Registration error:', error.message, error);
+        console.error('Stack:', error.stack);
         
         // Handle duplicate key error
         if (error.code === 11000) {
+            const field = Object.keys(error.keyPattern)[0];
             return res.status(400).json({
-                error: 'An account with this email already exists'
+                error: `An account with this ${field} already exists`
             });
         }
         
         // Handle validation errors
         if (error.name === 'ValidationError') {
             const messages = Object.values(error.errors).map(e => e.message);
+            console.error('Validation errors:', messages);
             return res.status(400).json({
                 error: 'Validation failed',
                 details: messages
             });
         }
         
+        // MongoDB connection error
+        if (error.name === 'MongooseError' || error.message?.includes('connect')) {
+            console.error('Database connection error');
+            return res.status(503).json({
+                error: 'Database connection error. Please try again in a moment.'
+            });
+        }
+        
         res.status(500).json({
-            error: 'Registration failed. Please try again.'
+            error: 'Registration failed. Please try again.',
+            details: process.env.NODE_ENV === 'development' ? error.message : undefined
         });
     }
 };

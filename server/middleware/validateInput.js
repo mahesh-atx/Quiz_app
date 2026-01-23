@@ -88,7 +88,8 @@ const quizValidation = [
     
     body('category')
         .notEmpty().withMessage('Category is required')
-        .isMongoId().withMessage('Invalid category ID'),
+        .trim(),
+        // Accept both ObjectId and category name - backend will handle lookup
     
     body('timeLimit')
         .optional()
@@ -97,6 +98,18 @@ const quizValidation = [
     body('difficulty')
         .optional()
         .isIn(['easy', 'medium', 'hard']).withMessage('Invalid difficulty level'),
+    
+    body('passPercentage')
+        .optional()
+        .isInt({ min: 0, max: 100 }).withMessage('Pass percentage must be 0-100'),
+    
+    body('questions')
+        .optional()
+        .isArray().withMessage('Questions must be an array'),
+    
+    body('isPublished')
+        .optional()
+        .isBoolean().withMessage('isPublished must be a boolean'),
     
     handleValidationErrors
 ];

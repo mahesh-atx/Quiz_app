@@ -106,13 +106,6 @@
           <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
           <span>Analytics</span>
         </a>
-        <a
-          href="/admin/settings.html"
-          class="flex items-center gap-3 px-4 py-3 rounded-xl text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 transition-colors"
-        >
-          <i data-lucide="settings" class="w-5 h-5"></i>
-          <span>Settings</span>
-        </a>
       </nav>
 
       <!-- User Profile -->
@@ -126,7 +119,7 @@
             <span id="userInitial" class="font-semibold text-white">A</span>
           </div>
           <div class="flex-1 min-w-0">
-            <p id="userName" class="font-medium truncate">Test Admin</p>
+            <p id="userName" class="font-medium truncate">Admin</p>
             <p class="text-xs text-zinc-500">Administrator</p>
           </div>
           <button
@@ -163,31 +156,12 @@
             </div>
             <span
               class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
-              >+18%</span
+              id="userGrowth"
+              >+0%</span
             >
           </div>
-          <p class="text-3xl font-bold mb-1">1,234</p>
-          <p class="text-zinc-500 text-sm">Total Users</p>
-        </div>
-
-        <!-- Teachers -->
-        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
-          <div class="flex items-center justify-between mb-4">
-            <div
-              class="w-12 h-12 bg-brand-500/10 rounded-xl flex items-center justify-center"
-            >
-              <i
-                data-lucide="graduation-cap"
-                class="w-6 h-6 text-brand-400"
-              ></i>
-            </div>
-            <span
-              class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
-              >+8%</span
-            >
-          </div>
-          <p class="text-3xl font-bold mb-1">89</p>
-          <p class="text-zinc-500 text-sm">Teachers</p>
+          <p class="text-3xl font-bold mb-1" id="totalUsers">0</p>
+          <p class="text-zinc-500 text-sm">Total Teachers</p>
         </div>
 
         <!-- Total Quizzes -->
@@ -200,23 +174,40 @@
             </div>
             <span
               class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
-              >+25%</span
+              >+0%</span
             >
           </div>
-          <p class="text-3xl font-bold mb-1">456</p>
+          <p class="text-3xl font-bold mb-1" id="totalQuizzes">0</p>
           <p class="text-zinc-500 text-sm">Total Quizzes</p>
+        </div>
+
+        <!-- Total Attempts -->
+        <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <div
+              class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center"
+            >
+              <i data-lucide="activity" class="w-6 h-6 text-green-400"></i>
+            </div>
+            <span
+              class="text-xs text-green-400 bg-green-400/10 px-2 py-1 rounded-full"
+              >+0%</span
+            >
+          </div>
+          <p class="text-3xl font-bold mb-1" id="totalAttempts">0</p>
+          <p class="text-zinc-500 text-sm">Quiz Attempts</p>
         </div>
 
         <!-- Categories -->
         <div class="bg-zinc-900 border border-zinc-800 rounded-2xl p-6">
           <div class="flex items-center justify-between mb-4">
             <div
-              class="w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center"
+              class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center"
             >
-              <i data-lucide="folder" class="w-6 h-6 text-green-400"></i>
+              <i data-lucide="folder" class="w-6 h-6 text-blue-400"></i>
             </div>
           </div>
-          <p class="text-3xl font-bold mb-1">12</p>
+          <p class="text-3xl font-bold mb-1" id="totalCategories">0</p>
           <p class="text-zinc-500 text-sm">Categories</p>
         </div>
       </div>
@@ -239,7 +230,14 @@
               class="flex items-center gap-3 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors"
             >
               <i data-lucide="folder-plus" class="w-5 h-5"></i>
-              <span>Add Category</span>
+              <span>Manage Categories</span>
+            </a>
+            <a
+              href="/admin/quizzes.html"
+              class="flex items-center gap-3 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors"
+            >
+              <i data-lucide="file-question" class="w-5 h-5"></i>
+              <span>View All Quizzes</span>
             </a>
             <a
               href="/admin/analytics.html"
@@ -247,13 +245,6 @@
             >
               <i data-lucide="bar-chart-3" class="w-5 h-5"></i>
               <span>View Analytics</span>
-            </a>
-            <a
-              href="/admin/settings.html"
-              class="flex items-center gap-3 p-4 bg-zinc-800 hover:bg-zinc-700 rounded-xl transition-colors"
-            >
-              <i data-lucide="settings" class="w-5 h-5"></i>
-              <span>Platform Settings</span>
             </a>
           </div>
         </div>
@@ -264,123 +255,224 @@
         >
           <div class="flex items-center justify-between mb-4">
             <h2 class="text-lg font-semibold">Recent Activity</h2>
-            <button class="text-purple-400 hover:text-purple-300 text-sm">
-              View All
-            </button>
           </div>
-          <div class="space-y-4">
-            <!-- Activity Item -->
-            <div class="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-xl">
-              <div
-                class="w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center flex-shrink-0"
-              >
-                <i data-lucide="user-plus" class="w-5 h-5 text-green-400"></i>
-              </div>
-              <div class="flex-1">
-                <p class="font-medium">New teacher registered</p>
-                <p class="text-sm text-zinc-500">
-                  John Smith joined the platform
-                </p>
-                <p class="text-xs text-zinc-600 mt-1">2 minutes ago</p>
-              </div>
-            </div>
-
-            <!-- Activity Item -->
-            <div class="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-xl">
-              <div
-                class="w-10 h-10 bg-brand-500/20 rounded-full flex items-center justify-center flex-shrink-0"
-              >
-                <i data-lucide="file-plus" class="w-5 h-5 text-brand-400"></i>
-              </div>
-              <div class="flex-1">
-                <p class="font-medium">New quiz created</p>
-                <p class="text-sm text-zinc-500">
-                  "Advanced Mathematics" by Sarah Johnson
-                </p>
-                <p class="text-xs text-zinc-600 mt-1">15 minutes ago</p>
-              </div>
-            </div>
-
-            <!-- Activity Item -->
-            <div class="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-xl">
-              <div
-                class="w-10 h-10 bg-amber-500/20 rounded-full flex items-center justify-center flex-shrink-0"
-              >
-                <i data-lucide="folder-plus" class="w-5 h-5 text-amber-400"></i>
-              </div>
-              <div class="flex-1">
-                <p class="font-medium">New category added</p>
-                <p class="text-sm text-zinc-500">
-                  "Computer Science" category created
-                </p>
-                <p class="text-xs text-zinc-600 mt-1">1 hour ago</p>
-              </div>
-            </div>
-
-            <!-- Activity Item -->
-            <div class="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-xl">
-              <div
-                class="w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center flex-shrink-0"
-              >
-                <i
-                  data-lucide="check-circle"
-                  class="w-5 h-5 text-purple-400"
-                ></i>
-              </div>
-              <div class="flex-1">
-                <p class="font-medium">Quiz completed</p>
-                <p class="text-sm text-zinc-500">
-                  150 students completed "Biology Basics"
-                </p>
-                <p class="text-xs text-zinc-600 mt-1">2 hours ago</p>
-              </div>
+          <div class="space-y-4" id="activityContainer">
+            <div class="text-center py-8 text-zinc-500">
+              <i data-lucide="loader" class="w-6 h-6 animate-spin mx-auto mb-2"></i>
+              <p>Loading activity...</p>
             </div>
           </div>
         </div>
       </div>
     </main>
 
-    <!-- Initialize Lucide Icons -->
+    <!-- Auth & Scripts -->
+    <script src="/js/auth.js"></script>
+
+    <!-- Initialize -->
     <script>
       lucide.createIcons();
 
-      // Check if user is logged in and is admin
-      const user = JSON.parse(localStorage.getItem("user") || "null");
-      const accessToken = localStorage.getItem("accessToken");
+      let currentUser = null;
 
-      if (!user || !accessToken) {
-        window.location.href = "/login.html";
-      } else if (user.role !== "admin") {
-        // Redirect non-admin users to teacher dashboard
-        window.location.href = "/dashboard.html";
-      } else {
-        // Update UI with user data
-        document.getElementById("userName").textContent = user.name || "Admin";
-        document.getElementById("userInitial").textContent = (
-          user.name?.[0] || "A"
-        ).toUpperCase();
-      }
+      // Initialize admin dashboard
+      async function initDashboard() {
+        try {
+          console.log("🔐 Starting admin dashboard initialization...");
 
-      // Logout functionality
-      document
-        .getElementById("logoutBtn")
-        .addEventListener("click", async () => {
-          try {
-            const refreshToken = localStorage.getItem("refreshToken");
-            await fetch("/api/auth/logout", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ refreshToken }),
-            });
-          } catch (e) {
-            console.error("Logout error:", e);
+          // Check authentication
+          const user = await checkAuth();
+          
+          if (!user) {
+            console.log("❌ No user authenticated");
+            return;
           }
 
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          localStorage.removeItem("user");
-          window.location.href = "/login.html";
-        });
+          currentUser = user;
+          console.log("✅ User authenticated:", user.name, "Role:", user.role);
+
+          // Verify admin role
+          if (user.role !== "admin") {
+            console.log("⛔ User is not admin, redirecting to dashboard");
+            setTimeout(() => {
+              window.location.href = "/dashboard.html";
+            }, 2000);
+            return;
+          }
+
+          // Update user profile UI
+          updateUserUI(user);
+
+          // Load dashboard data
+          await loadDashboardData();
+
+        } catch (error) {
+          console.error("❌ Dashboard init error:", error);
+        }
+      }
+
+      // Load all dashboard data
+      async function loadDashboardData() {
+        try {
+          console.log("📊 Loading dashboard statistics...");
+
+          // Fetch all required data in parallel
+          const [teachersRes, quizzesRes, categoriesRes, resultsRes] = await Promise.all([
+            fetch("/api/users/teachers?limit=1000", { credentials: "include" }),
+            fetch("/api/quizzes?limit=1000", { credentials: "include" }),
+            fetch("/api/categories", { credentials: "include" }),
+            fetch("/api/results?limit=1000", { credentials: "include" }),
+          ]);
+
+          // Parse responses
+          const teachersData = await teachersRes.json();
+          const quizzesData = await quizzesRes.json();
+          const categoriesData = await categoriesRes.json();
+          const resultsData = await resultsRes.json();
+
+          const teachers = teachersData.teachers || [];
+          const quizzes = quizzesData.quizzes || [];
+          const categories = categoriesData.categories || [];
+          const results = resultsData.data || [];
+
+          console.log("📊 Data loaded:", {
+            teachers: teachers.length,
+            quizzes: quizzes.length,
+            categories: categories.length,
+            results: results.length,
+          });
+
+          // Update stat cards
+          document.getElementById("totalUsers").textContent = teachers.length;
+          document.getElementById("totalQuizzes").textContent = quizzes.length;
+          document.getElementById("totalAttempts").textContent = results.length;
+          document.getElementById("totalCategories").textContent = categories.length;
+
+          // Load recent activity
+          loadRecentActivity(teachers, quizzes, categories, results);
+
+        } catch (error) {
+          console.error("❌ Error loading dashboard data:", error);
+          document.getElementById("activityContainer").innerHTML = `
+            <div class="text-center py-8 text-red-500">
+              <p>Unable to load activity data</p>
+              <p class="text-sm text-zinc-400 mt-2">${error.message}</p>
+            </div>
+          `;
+        }
+      }
+
+      // Load and display recent activity
+      function loadRecentActivity(teachers, quizzes, categories, results) {
+        const container = document.getElementById("activityContainer");
+        const activities = [];
+
+        // Add recent teachers
+        if (teachers.length > 0) {
+          teachers.slice(0, 2).forEach((teacher) => {
+            activities.push({
+              icon: "user-plus",
+              color: "green",
+              title: "New teacher registered",
+              description: `${teacher.name} joined the platform`,
+              time: new Date(teacher.createdAt).toLocaleDateString(),
+            });
+          });
+        }
+
+        // Add recent quizzes
+        if (quizzes.length > 0) {
+          quizzes.slice(0, 2).forEach((quiz) => {
+            activities.push({
+              icon: "file-plus",
+              color: "brand",
+              title: "New quiz created",
+              description: `"${quiz.title}" by ${quiz.createdBy?.name || "Unknown"}`,
+              time: new Date(quiz.createdAt).toLocaleDateString(),
+            });
+          });
+        }
+
+        // Add categories
+        if (categories.length > 0) {
+          categories.slice(0, 1).forEach((category) => {
+            activities.push({
+              icon: "folder-plus",
+              color: "amber",
+              title: "New category",
+              description: `"${category.name}" category created`,
+              time: new Date(category.createdAt || Date.now()).toLocaleDateString(),
+            });
+          });
+        }
+
+        // Add completion activity if results exist
+        if (results.length > 0) {
+          activities.push({
+            icon: "check-circle",
+            color: "purple",
+            title: "Quiz attempts",
+            description: `${results.length} total quiz attempts completed`,
+            time: "This month",
+          });
+        }
+
+        // If no activities, show default message
+        if (activities.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-8 text-zinc-500">
+              <p>No recent activity yet</p>
+            </div>
+          `;
+          return;
+        }
+
+        // Render activities (limit to 4)
+        container.innerHTML = activities
+          .slice(0, 4)
+          .map(
+            (activity) => `
+            <div class="flex items-start gap-4 p-4 bg-zinc-800/50 rounded-xl">
+              <div class="w-10 h-10 bg-${activity.color}-500/20 rounded-full flex items-center justify-center flex-shrink-0">
+                <i data-lucide="${activity.icon}" class="w-5 h-5 text-${activity.color}-400"></i>
+              </div>
+              <div class="flex-1">
+                <p class="font-medium">${activity.title}</p>
+                <p class="text-sm text-zinc-500">${activity.description}</p>
+                <p class="text-xs text-zinc-600 mt-1">${activity.time}</p>
+              </div>
+            </div>
+          `
+          )
+          .join("");
+
+        lucide.createIcons();
+      }
+
+      // Setup logout
+      document.getElementById("logoutBtn").addEventListener("click", async () => {
+        try {
+          await fetch("/api/auth/logout", {
+            method: "POST",
+            credentials: "include",
+          });
+        } catch (e) {
+          console.error("Logout error:", e);
+        }
+
+        localStorage.removeItem("user");
+        window.location.href = "/login.html";
+      });
+
+      // Start initialization when page loads
+      document.addEventListener("DOMContentLoaded", initDashboard);
+
+      // Also try immediately in case DOM is already loaded
+      if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", initDashboard);
+      } else {
+        initDashboard();
+      }
     </script>
   </body>
 </html>

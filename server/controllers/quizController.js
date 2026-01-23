@@ -28,31 +28,71 @@ const createQuiz = async (req, res) => {
             isPublished 
         } = req.body;
 
-        // 1. Validate Category
-        // Note: Frontend sends category name or ID? 
-        // Based on create-quiz.html, it sends name like 'mathematics'.
-        // We need to find the Category ID.
-        let categoryId = category;
-        const foundCategory = await Category.findOne({ 
-            $or: [
-                { _id: category.match(/^[0-9a-fA-F]{24}$/) ? category : null },
-                { name: { $regex: new RegExp(`^${category}$`, 'i') } }
-            ]
-        });
+        console.log('📝 Creating quiz:', { title, category, questionCount: questions?.length || 0 });
+
+        // Validate required fields
+        if (!title || !category || !difficulty || !timeLimit || !passPercentage) {
+            return res.status(400).json({ 
+                error: 'Missing required fields: title, category, difficulty, timeLimit, passPercentage' 
+            });
+        }
+
+        // Validate category exists
+        if (!category || category.trim() === '') {
+            return res.status(400).json({ 
+                error: 'Category is required' 
+            });
+        }
+
+        // 1. Validate Category - find by name or ID
+        let categoryId = null;
+        let foundCategory = null;
+
+        console.log('🔍 Looking for category:', category);
+
+        try {
+            // First try to find by ObjectId if it looks like one
+            if (category.match(/^[0-9a-fA-F]{24}$/)) {
+                foundCategory = await Category.findById(category);
+                console.log('Found category by ID:', foundCategory ? foundCategory.name : 'not found');
+            }
+            
+            // If not found, try by name (case-insensitive)
+            if (!foundCategory) {
+                foundCategory = await Category.findOne({ 
+                    name: { $regex: new RegExp(`^${category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`, 'i') } 
+                });
+                console.log('Found category by name:', foundCategory ? foundCategory.name : 'not found');
+            }
+        } catch (catError) {
+            console.error('Error finding category:', catError.message);
+            return res.status(400).json({ 
+                error: 'Error validating category. Please try again.' 
+            });
+        }
 
         if (!foundCategory) {
-            return res.status(400).json({ error: 'Invalid category' });
+            console.warn('⚠️  Category not found:', category);
+            // Fetch all categories for debugging
+            const allCategories = await Category.find().select('name');
+            console.log('Available categories:', allCategories.map(c => c.name));
+            return res.status(400).json({ 
+                error: 'Invalid category. Please select a valid category.',
+                availableCategories: allCategories.map(c => c.name)
+            });
         }
+
         categoryId = foundCategory._id;
+        console.log('✅ Using category ID:', categoryId);
 
         // 2. Create Quiz
         const quiz = new Quiz({
-            title,
-            description,
+            title: title.trim(),
+            description: description?.trim() || '',
             category: categoryId,
             difficulty,
-            timeLimit,
-            passPercentage,
+            timeLimit: parseInt(timeLimit),
+            passPercentage: parseInt(passPercentage),
             isPublished: isPublished || false,
             createdBy: req.userId
         });
@@ -62,37 +102,89 @@ const createQuiz = async (req, res) => {
             const code = quiz.generateAccessCode();
             const baseUrl = process.env.BASE_URL || 'http://localhost:3000';
             quiz.joinLink = `${baseUrl}/join-quiz.html?code=${code}`;
+            console.log('Generated access code:', code);
         }
 
+        console.log('💾 Saving quiz to database...');
         await quiz.save();
+        console.log('✅ Quiz saved with ID:', quiz._id);
 
         // 3. Create Questions
-        if (questions && Array.isArray(questions)) {
-            const questionData = questions.map((q, index) => ({
-                quiz: quiz._id,
-                questionText: q.questionText,
-                options: q.options,
-                points: q.points || 1,
-                order: index,
-                explanation: q.explanation || ''
-            }));
-
-            await Question.insertMany(questionData);
+        if (questions && Array.isArray(questions) && questions.length > 0) {
+            console.log('📝 Creating', questions.length, 'questions...');
             
-            // Update quiz stats (totalPoints and questionCount)
-            await quiz.updateStats();
+            const questionData = questions.map((q, index) => {
+                // Validate question data
+                if (!q.questionText || !q.options || q.options.length === 0) {
+                    throw new Error(`Question ${index + 1}: Missing question text or options`);
+                }
+
+                return {
+                    quiz: quiz._id,
+                    questionText: q.questionText.trim(),
+                    options: q.options.map(opt => ({
+                        text: typeof opt === 'string' ? opt : (opt.text || ''),
+                        isCorrect: opt.isCorrect || false
+                    })),
+                    points: q.points || 1,
+                    order: index,
+                    explanation: q.explanation?.trim() || ''
+                };
+            });
+
+            try {
+                await Question.insertMany(questionData);
+                console.log('✅ Questions created successfully');
+                
+                // Update quiz stats (totalPoints and questionCount)
+                await quiz.updateStats();
+                console.log('✅ Quiz stats updated');
+            } catch (qError) {
+                console.error('❌ Error creating questions:', qError.message);
+                // Delete the quiz if questions fail
+                await Quiz.findByIdAndDelete(quiz._id);
+                throw new Error('Failed to create questions: ' + qError.message);
+            }
+        } else {
+            console.warn('⚠️  No questions provided for quiz');
         }
+
+        // Fetch the created quiz with populated fields
+        const createdQuiz = await Quiz.findById(quiz._id)
+            .populate('category', 'name')
+            .populate('createdBy', 'name');
+
+        console.log('✅ Quiz created and published successfully');
 
         res.status(201).json({
             message: 'Quiz created successfully',
-            quiz: await Quiz.findById(quiz._id).populate('category', 'name')
+            quiz: createdQuiz
         });
 
     } catch (error) {
-        console.error('Create quiz error:', error);
+        console.error('❌ Create quiz error:', error.message);
+        console.error('Stack:', error.stack);
+
+        // Handle validation errors
+        if (error.name === 'ValidationError') {
+            const messages = Object.values(error.errors).map(e => e.message);
+            console.error('Validation errors:', messages);
+            return res.status(400).json({
+                error: 'Validation failed',
+                details: messages
+            });
+        }
+
+        // Handle MongoDB errors
+        if (error.name === 'MongooseError' || error.message?.includes('MongoDB')) {
+            return res.status(503).json({
+                error: 'Database error. Please try again in a moment.'
+            });
+        }
+
         res.status(500).json({
-            error: 'Failed to create quiz',
-            details: error.message
+            error: error.message || 'Failed to create quiz',
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 };
