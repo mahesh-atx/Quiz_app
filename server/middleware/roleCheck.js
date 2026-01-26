@@ -14,21 +14,24 @@ const requireRole = (allowedRoles) => {
     
     return (req, res, next) => {
         // Check if user exists (auth middleware should run first)
-        if (!req.user) {
+        // Support both req.user (from database) and req.userRole (from session/dummy users)
+        const userRole = req.user?.role || req.userRole;
+        
+        if (!userRole) {
             return res.status(401).json({
                 error: 'Authentication required.'
             });
         }
         
         // Check if user's role is in allowed roles
-        if (!roles.includes(req.user.role)) {
+        if (!roles.includes(userRole)) {
             return res.status(403).json({
                 error: 'Access denied. Insufficient permissions.',
                 required: roles,
-                current: req.user.role
+                current: userRole
             });
         }
-        
+
         next();
     };
 };

@@ -122,6 +122,7 @@
           <button
             id="logoutBtn"
             class="text-zinc-500 hover:text-red-400 transition-colors"
+            title="Logout"
           >
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
@@ -190,6 +191,7 @@
                 name="category"
                 required
                 class="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
+                title="Select a category"
               >
                 <option value="">Select a category</option>
                 <option value="mathematics">Mathematics</option>
@@ -210,6 +212,7 @@
               <select
                 id="difficulty"
                 name="difficulty"
+                title="Select difficulty level"
                 class="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
               >
                 <option value="easy">Easy</option>
@@ -229,6 +232,8 @@
                 name="timeLimit"
                 min="1"
                 max="180"
+                title="Enter time limit in minutes"
+                placeholder="30"
                 value="30"
                 class="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
               />
@@ -242,8 +247,8 @@
               <input
                 type="number"
                 id="passPercentage"
-                name="passPercentage"
-                min="0"
+                name="passPercentage"                title="Enter pass percentage"
+                placeholder="70"                min="0"
                 max="100"
                 value="60"
                 class="w-full px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-xl focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none transition-colors"
@@ -593,7 +598,17 @@
             const data = await response.json();
 
             if (!response.ok) {
-              throw new Error(data.error || "Failed to create quiz");
+              // Show detailed error message
+              let errorMsg = data.error || "Failed to create quiz";
+              if (data.details && Array.isArray(data.details)) {
+                errorMsg += ": " + data.details.join(", ");
+              } else if (data.details) {
+                errorMsg += ": " + data.details;
+              }
+              if (data.availableCategories) {
+                errorMsg += "\nAvailable categories: " + data.availableCategories.join(", ");
+              }
+              throw new Error(errorMsg);
             }
 
             // Success Modal
@@ -645,7 +660,31 @@
             return;
           } catch (error) {
             console.error("Quiz creation error:", error);
-            alert(error.message);
+            
+            // Create error modal with better message display
+            const errorModal = document.createElement("div");
+            errorModal.className =
+              "fixed inset-0 z-50 flex items-center justify-center px-4";
+            errorModal.innerHTML = `
+              <div class="fixed inset-0 bg-black/80 backdrop-blur-sm transition-opacity"></div>
+              <div class="bg-zinc-900 border border-red-800/50 rounded-2xl w-full max-w-md p-6 relative z-10 shadow-2xl transform transition-all scale-100">
+                <div class="text-center mb-6">
+                  <div class="w-16 h-16 bg-red-500/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i data-lucide="alert-circle" class="w-8 h-8 text-red-500"></i>
+                  </div>
+                  <h2 class="text-2xl font-bold mb-2 text-red-500">Error Publishing Quiz</h2>
+                  <p class="text-zinc-300 text-sm whitespace-pre-wrap">${error.message}</p>
+                </div>
+
+                <div class="space-y-3">
+                  <button onclick="this.closest('.fixed').remove()" class="w-full py-3 bg-zinc-800 hover:bg-zinc-700 rounded-xl font-semibold transition-colors">
+                    Try Again
+                  </button>
+                </div>
+              </div>
+            `;
+            document.body.appendChild(errorModal);
+            lucide.createIcons();
 
             // Restore button state
             publishBtn.disabled = false;

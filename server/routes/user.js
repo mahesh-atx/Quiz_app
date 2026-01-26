@@ -3,6 +3,7 @@ const router = express.Router();
 const userController = require('../controllers/userController');
 const { auth } = require('../middleware/auth');
 const { adminOnly } = require('../middleware/roleCheck');
+const { mongoIdParam } = require('../middleware/validateInput');
 
 /**
  * User Routes
@@ -60,7 +61,7 @@ router.get('/teachers', auth, adminOnly, userController.getAllTeachers);
  * @desc    Get teacher by ID
  * @access  Admin only
  */
-router.get('/teachers/:id', auth, adminOnly, userController.getTeacherById);
+router.get('/teachers/:id', auth, adminOnly, mongoIdParam, userController.getTeacherById);
 
 /**
  * @route   PUT /api/users/teachers/:id
@@ -68,13 +69,13 @@ router.get('/teachers/:id', auth, adminOnly, userController.getTeacherById);
  * @access  Admin only
  * @body    { name?, institution?, isActive? }
  */
-router.put('/teachers/:id', auth, adminOnly, userController.updateTeacher);
+router.put('/teachers/:id', auth, adminOnly, mongoIdParam, userController.updateTeacher);
 
 /**
  * @route   DELETE /api/users/teachers/:id
  * @desc    Delete teacher
  * @access  Admin only
  */
-router.delete('/teachers/:id', auth, adminOnly, userController.deleteTeacher);
+router.delete('/teachers/:id', auth, adminOnly, mongoIdParam, userController.deleteTeacher);
 
 module.exports = router;

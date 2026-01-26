@@ -262,11 +262,14 @@ async function submitQuiz() {
     };
     
     if (isStudent) {
-        payload.studentId = studentProfile._id;
+        payload.studentId = studentProfile._id || studentProfile.id;
         payload.participantType = 'student';
     } else {
         payload.participantType = 'user';
     }
+
+    console.log('🎯 Submitting with payload:', payload);
+    console.log('Student profile:', studentProfile);
     
     try {
         const response = await fetch('/api/results/submit', {
@@ -280,15 +283,18 @@ async function submitQuiz() {
         const data = await response.json();
         
         if (!response.ok) {
-            throw new Error(data.error || 'Submission failed');
+            throw new Error(data.message || data.error || 'Submission failed');
         }
         
+        console.log('✅ Quiz submitted successfully:', data);
+        
         // Redirect to results page
+        const resultId = data.resultId || data.data?.id;
         setTimeout(() => {
              if (isStudent) {
-                 window.location.href = `/student-result.html?id=${data.resultId}`;
+                 window.location.href = `/student-result.html?id=${resultId}`;
              } else {
-                 window.location.href = `/results.html?id=${data.resultId}`;
+                 window.location.href = `/results.html?id=${resultId}`;
              }
         }, 1500);
         
