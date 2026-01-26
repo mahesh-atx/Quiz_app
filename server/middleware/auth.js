@@ -19,8 +19,8 @@ const auth = async (req, res, next) => {
         }
         
         // Handle dummy users (for testing)
-        if (req.session.userId === 'dummy-teacher-id-123' || 
-            req.session.userId === 'dummy-admin-id-456') {
+        if (req.session.userId === '507f1f77bcf86cd799439011' || 
+            req.session.userId === '507f1f77bcf86cd799439012') {
             req.userId = req.session.userId;
             req.userRole = req.session.role;
             return next();
@@ -67,8 +67,8 @@ const optionalAuth = async (req, res, next) => {
     try {
         if (req.session && req.session.userId) {
             // Handle dummy users
-            if (req.session.userId === 'dummy-teacher-id-123' || 
-                req.session.userId === 'dummy-admin-id-456') {
+            if (req.session.userId === '507f1f77bcf86cd799439011' || 
+                req.session.userId === '507f1f77bcf86cd799439012') {
                 req.userId = req.session.userId;
                 req.userRole = req.session.role;
                 return next();

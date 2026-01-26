@@ -158,6 +158,10 @@ studentSchema.statics.findByEmail = function(email) {
  * Get students for a specific teacher
  */
 studentSchema.statics.getByTeacher = function(teacherId) {
+    // Return empty array if no teacherId provided (for demo/dummy users)
+    if (!teacherId) {
+        return Promise.resolve([]);
+    }
     return this.find({ associatedTeachers: teacherId })
         .sort({ lastActive: -1 });
 };

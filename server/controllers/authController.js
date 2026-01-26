@@ -136,7 +136,7 @@ const login = async (req, res) => {
             'teacher@test.com': {
                 password: 'teacher123',
                 user: {
-                    _id: 'dummy-teacher-id-123',
+                    _id: '507f1f77bcf86cd799439011',
                     name: 'Test Teacher',
                     email: 'teacher@test.com',
                     role: 'teacher',
@@ -310,10 +310,10 @@ const getCurrentUser = async (req, res) => {
         }
         
         // Handle dummy users
-        if (req.session.userId === 'dummy-teacher-id-123') {
+        if (req.session.userId === '507f1f77bcf86cd799439011') {
             return res.json({
                 user: {
-                    id: 'dummy-teacher-id-123',
+                    id: '507f1f77bcf86cd799439011',
                     name: 'Test Teacher',
                     email: 'teacher@test.com',
                     role: 'teacher',
@@ -323,10 +323,10 @@ const getCurrentUser = async (req, res) => {
             });
         }
         
-        if (req.session.userId === 'dummy-admin-id-456') {
+        if (req.session.userId === '507f1f77bcf86cd799439012') {
             return res.json({
                 user: {
-                    id: 'dummy-admin-id-456',
+                    id: '507f1f77bcf86cd799439012',
                     name: 'Test Admin',
                     email: 'admin@test.com',
                     role: 'admin',

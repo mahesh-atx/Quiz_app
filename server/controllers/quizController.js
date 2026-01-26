@@ -269,8 +269,11 @@ const deleteQuiz = async (req, res) => {
             return res.status(404).json({ error: 'Quiz not found' });
         }
 
-        // Check ownership
-        if (quiz.createdBy.toString() !== req.userId && req.userRole !== 'admin') {
+        // Check ownership - convert both to strings for comparison
+        const quizCreatorId = quiz.createdBy.toString();
+        const userId = req.userId.toString();
+        
+        if (quizCreatorId !== userId && req.userRole !== 'admin') {
             return res.status(403).json({ error: 'Unauthorized to delete this quiz' });
         }
 
@@ -300,8 +303,11 @@ const generateCode = async (req, res) => {
             return res.status(404).json({ error: 'Quiz not found' });
         }
 
-        // Check ownership
-        if (quiz.createdBy.toString() !== req.userId && req.userRole !== 'admin') {
+        // Check ownership - convert both to strings for comparison
+        const quizCreatorId = quiz.createdBy.toString();
+        const userId = req.userId.toString();
+        
+        if (quizCreatorId !== userId && req.userRole !== 'admin') {
             return res.status(403).json({ error: 'Unauthorized' });
         }
 

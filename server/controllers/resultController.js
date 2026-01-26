@@ -289,8 +289,11 @@ const getResultsByQuiz = async (req, res) => {
             });
         }
 
-        // Check authorization (must be quiz creator)
-        if (quiz.createdBy.toString() !== req.userId) {
+        // Check authorization (must be quiz creator) - convert both to strings for comparison
+        const quizCreatorId = quiz.createdBy.toString();
+        const userId = req.userId.toString();
+        
+        if (quizCreatorId !== userId) {
             return res.status(403).json({
                 success: false,
                 message: 'Not authorized to view results for this quiz'

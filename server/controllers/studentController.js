@@ -89,6 +89,9 @@ exports.verifyQuizCode = async (req, res) => {
             });
         }
         
+        // Handle case where createdBy doesn't exist (dummy users or deleted users)
+        const createdByName = quiz.createdBy?.name || 'Unknown Teacher';
+        
         res.json({
             success: true,
             data: {
@@ -99,7 +102,7 @@ exports.verifyQuizCode = async (req, res) => {
                 difficulty: quiz.difficulty,
                 timeLimit: quiz.timeLimit,
                 questionCount: quiz.questionCount,
-                createdBy: quiz.createdBy.name
+                createdBy: createdByName
             }
         });
         
@@ -163,7 +166,8 @@ exports.getStudentsByQuiz = async (req, res) => {
  */
 exports.getStudentsByTeacher = async (req, res) => {
     try {
-        const teacherId = req.user._id;
+        // Use req.user._id if available (real users), otherwise use req.userId (dummy users)
+        const teacherId = req.user?._id || req.userId;
         
         const students = await Student.getByTeacher(teacherId);
         

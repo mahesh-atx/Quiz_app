@@ -78,7 +78,7 @@
             <p id="userName" class="font-medium truncate">Admin</p>
             <p class="text-xs text-zinc-500">Administrator</p>
           </div>
-          <button id="logoutBtn" class="text-zinc-500 hover:text-red-400 transition-colors">
+          <button id="logoutBtn" class="text-zinc-500 hover:text-red-400 transition-colors" title="Logout">
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
         </div>
@@ -238,7 +238,8 @@
             credentials: "include",
           });
 
-          if (!response.ok) throw new Error("Failed to delete category");
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || "Failed to delete category");
           
           alert("Category deleted successfully!");
           loadCategories();

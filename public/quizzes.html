@@ -122,6 +122,7 @@
           <button
             id="logoutBtn"
             class="text-zinc-500 hover:text-red-400 transition-colors"
+            title="Logout"
           >
             <i data-lucide="log-out" class="w-5 h-5"></i>
           </button>
@@ -165,6 +166,7 @@
         <select
           id="statusFilter"
           class="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:border-brand-500 outline-none transition-colors"
+          title="Filter by status"
         >
           <option value="all">All Status</option>
           <option value="published">Published</option>
@@ -173,6 +175,7 @@
         <select
           id="categoryFilter"
           class="px-4 py-3 bg-zinc-900 border border-zinc-800 rounded-xl focus:border-brand-500 outline-none transition-colors"
+          title="Filter by category"
         >
           <option value="all">All Categories</option>
           <option value="mathematics">Mathematics</option>
@@ -734,8 +737,11 @@
                 <button class="p-2 hover:bg-zinc-800 rounded-lg transition-colors" title="View Results" onclick="viewResults('${quiz._id}')">
                   <i data-lucide="bar-chart-3" class="w-4 h-4 text-zinc-400"></i>
                 </button>
-                <button class="p-2 hover:bg-zinc-800 rounded-lg transition-colors" title="Edit Quiz">
+                <button class="p-2 hover:bg-zinc-800 rounded-lg transition-colors" title="Edit Quiz" onclick="editQuiz('${quiz._id}')">
                   <i data-lucide="edit" class="w-4 h-4 text-zinc-400"></i>
+                </button>
+                <button class="p-2 hover:bg-zinc-800 rounded-lg transition-colors" title="Share Quiz" onclick="shareQuizFunc('${quiz._id}')">
+                  <i data-lucide="share-2" class="w-4 h-4 text-zinc-400"></i>
                 </button>
                 <button class="p-2 hover:bg-zinc-800 rounded-lg transition-colors text-red-400" onclick="deleteQuiz('${quiz._id}')" title="Delete">
                   <i data-lucide="trash-2" class="w-4 h-4"></i>
@@ -752,6 +758,28 @@
       // View Results
       window.viewResults = function (id) {
         window.location.href = `/quiz-results.html?id=${id}`;
+      };
+
+      // Edit Quiz
+      window.editQuiz = function (id) {
+        window.location.href = `/create-quiz.html?id=${id}`;
+      };
+
+      // Share Quiz Function
+      window.shareQuizFunc = async function (id) {
+        try {
+          const response = await authFetch(`/api/quizzes/${id}`);
+          const data = await response.json();
+          
+          if (!response.ok) {
+            throw new Error(data.error || "Failed to load quiz");
+          }
+          
+          const quiz = data.quiz;
+          window.shareQuiz(quiz.accessCode, quiz.title, quiz.joinLink);
+        } catch (error) {
+          alert(error.message);
+        }
       };
 
       // Delete Quiz
@@ -803,7 +831,7 @@
         renderQuizzes(filtered);
       }
 
-      // Share Quiz Function
+      // Share Quiz Modal
       window.shareQuiz = function (code, title, link) {
         if (!code) return;
 
